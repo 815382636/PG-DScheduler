@@ -1,0 +1,1 @@
+python3 train.py --num_init_dags 3 --num_stream_dags 5 --enb_num 1  --mobile_device_num 2 --num_ep 5000 --diff_reward_enabled 1 --num_agents 16 --model_save_interval 100 --model_folder ./models/stream_200_job_diff_reward_reset_5e-7_5e-8/
