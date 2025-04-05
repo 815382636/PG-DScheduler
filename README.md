@@ -5,7 +5,7 @@ Online Scheduling for Distributed DNN Training Tasks in resource-constrained edg
 ## Requirements
 
 ```
-Python>=.6.2
+Python>=3.6.2
 tensorflow>=1.13.1
 ```
 
