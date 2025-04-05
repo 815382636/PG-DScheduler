@@ -145,18 +145,3 @@ for exp in range(args.num_exp):
         all_avg_total[scheme] = np.mean(all_total_time[scheme])
 
 print(1)
-    # plot CDF of performance
-
-    # fig = plt.figure()
-    # ax = fig.add_subplot(111)
-    #
-    # for scheme in args.test_schemes:
-    #     x, y = compute_CDF(all_total_reward[scheme])
-    #     ax.plot(x, y)
-    #
-    # plt.xlabel('Total reward')
-    # plt.ylabel('CDF')
-    # plt.legend(args.test_schemes)
-    # fig.savefig(args.result_folder + 'total_reward.png')
-    #
-    # plt.close(fig)

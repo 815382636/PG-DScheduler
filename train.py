@@ -42,44 +42,6 @@ def invoke_model(actor_agent, obs, exp, ep, time, agent_id):
 
     node = action_map[node_act[0]]
 
-    # greedy
-    # waste_time_min = 100000000
-    # target_server = -1
-    # if len(node.parent_nodes) != 0 and len(node.child_nodes) != 0:
-    #     for j in range(args.enb_num + 1):
-    #         if enb_valid_mask[0, node_act[0], j] == 1:
-    #             if j != args.enb_num:
-    #                 est_by_server = max(servers[j].avail_time, curr_time)
-    #                 est_by_parents = get_node_est_by_parents(node, j, enb_adj, curr_time)
-    #             else:
-    #                 est_by_server = max(servers[node.job_dag.source_id].avail_time, curr_time)
-    #                 est_by_parents = get_node_est_by_parents(node, node.job_dag.source_id, enb_adj, curr_time)
-    #             waste_time = abs(est_by_server - est_by_parents)
-    #             if waste_time < waste_time_min:
-    #                 waste_time_min = waste_time
-    #                 target_server = j
-    #     assert target_server != -1
-    #     assert waste_time_min >= 0
-    #     enb_act[0, node_act[0]] = target_server
-
-    # min = 999999999999
-    # target_server = -1
-    # if len(node.parent_nodes) != 0 and len(node.child_nodes) != 0:
-    #     for j in range(args.enb_num + 1):
-    #         if enb_valid_mask[0, node_act[0], j] == 1:
-    #             if j < args.enb_num:
-    #                 est = max(servers[j].avail_time, get_node_est_by_parents(node, j, enb_adj, curr_time),
-    #                           curr_time) + node.workload / servers[j].computing_power
-    #             elif j == args.enb_num:
-    #                 est = max(servers[node.job_dag.source_id].avail_time,
-    #                           get_node_est_by_parents(node, node.job_dag.source_id, enb_adj, curr_time),
-    #                           curr_time) + node.workload / servers[node.job_dag.source_id].computing_power
-    #             if est < min:
-    #                 min = est
-    #                 target_server = j
-    #     assert target_server != -1
-    #     enb_act[0, node_act[0]] = target_server
-
     assert node_valid_mask[0, node_act[0]] == 1
     assert enb_valid_mask[0, node_act[0], enb_act[0, node_act[0]]] == 1
 
