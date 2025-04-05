@@ -57,6 +57,9 @@ def plot_embedding_2d_DAG(X, index, title=None):
 def visualize_executor_usage(job_dags, file_path):
     exp_completion_time = int(np.ceil(np.max([
         j.completion_time for j in job_dags])))
+    completion_time_list = [j.completion_time for j in job_dags]
+    print(file_path)
+    print("完成时间：", max(completion_time_list))
 
     temp = job_dags.to_list()
     job_durations = \

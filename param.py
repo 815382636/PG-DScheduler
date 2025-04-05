@@ -2,7 +2,7 @@
 #dag个数
 import argparse
 
-parser = argparse.ArgumentParser(description='DAG_ML')
+parser = argparse.ArgumentParser(description='PG-DScheduler')
 
 # -- Basic --
 parser.add_argument('--seed', type=int, default=42,
@@ -19,6 +19,8 @@ parser.add_argument('--result_folder', type=str, default='./results/',
                     help='Result folder path (default: ./results)')
 parser.add_argument('--model_folder', type=str, default='./models/',
                     help='Model folder path (default: ./models)')
+parser.add_argument('--test_size', type=int, default=1, help="datasets")
+
 # parser.add_argument('--model_folder', type=str, default='./models/cloud/tiny/standard/',
 #                     help='Model folder path (default: ./models)')
 

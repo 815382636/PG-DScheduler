@@ -3,8 +3,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # 文件路径
-input_file_path = "log.log"
-output_file_path = "result_steam_5_epoch_5000.xlsx"
+input_file_path = "log_5_10_2_4_long.log"
+output_file_path = "result_2_11.xlsx"
 
 # 读取文件内容，忽略解码错误
 with open(input_file_path, 'r', encoding='utf-8', errors='ignore') as file:

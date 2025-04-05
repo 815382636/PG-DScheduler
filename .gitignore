@@ -1,2 +1,11 @@
 /models/
 /results/
+*.log
+*.json
+*.xlsx
+*.txt
+*.sh
+*.pyc
+.idea/
+.vscode/
+.DS_Store

@@ -4,7 +4,7 @@ import copy
 from collections import OrderedDict
 from param import *
 from utils import *
-from actor_agent import get_node_est_by_parents
+from actor_agent import get_node_est_by_parents, get_node_est_by_childs
 from spark_env.action_map import compute_act_map
 from spark_env.reward_calculator import RewardCalculator
 from spark_env.job_generator import generate_jobs
@@ -167,6 +167,25 @@ class Environment(object):
             self.servers[server_id].node_list.append(node)
         self.servers[server_id].avail_time = node.node_finish_time
 
+    def back_propagation(self, node):
+        # 反向传播
+        for child in node.child_nodes:
+            if child.back_sign is False:
+                return
+        
+        est_by_child = get_node_est_by_childs(node, self.enb_adj, self.wall_time.curr_time)
+        est = est_by_child
+        # 传输损失相关
+        node.tran_loss += abs(self.wall_time.curr_time - est_by_child) / 20
+        node.waste_loss += abs(self.wall_time.curr_time - est_by_child) / 20
+        node.exec_loss += node.workload / node.enb.computing_power / 20        
+        # 记录开始时间与完成时间
+        end_time = est + node.workload / node.enb.computing_power / 20  
+        node.node_start_time = est
+        node.node_finish_time = end_time
+        self.timeline.push(end_time, node.enb)
+
+
     def step(self, next_node, server_id, node_idx, exp):
 
         if server_id == args.enb_num:
@@ -219,12 +238,40 @@ class Environment(object):
                     node.job_dag.completion_time = self.wall_time.curr_time
                     self.remove_job(node.job_dag)
 
+                if not args.test_size and isinstance(obj, Enb):  # node完成
+                    node = obj.node
+
+                    if node.node_finished is False:
+                        # 前向传播过程
+                        node.node_finished = True
+                        node.job_dag.num_nodes_done += 1
+
+                        if len(node.child_nodes) == 0:
+                            # 叶子节点，开始反向传播
+                            self.back_propagation(node)
+                    else:
+                        node.job_dag.revise_num_nodes_done += 1
+
+                        # 反向传播过程
+                        if node.job_dag.revise_num_nodes_done == node.job_dag.num_nodes:
+                            # 第一个节点，反向传播完成
+                            node.job_dag.completed = True
+                            node.job_dag.completion_time = self.wall_time.curr_time
+                            self.remove_job(node.job_dag)
+                        else:
+                            # 继续反向传播
+                            node.back_sign = True
+                            for nod in node.parent_nodes:
+                                self.back_propagation(nod)
+                            obj.reset()
+
                 if not obj.node_wait.empty():
                     node_next = obj.node_wait.get()
                     obj.node_list.remove(node_next)
                     self.timeline.push(node_next.node_finish_time, obj)
                     obj.node = node_next
                     obj.job = node_next.job_dag
+
                 else:
                     obj.occupied = False
                     obj.node = None

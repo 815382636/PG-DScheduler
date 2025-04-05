@@ -35,6 +35,15 @@ def get_node_est_by_parents(node, server_id, enb_adj, curr_time):
     return maxi
 
 
+def get_node_est_by_childs(node, enb_adj, curr_time):
+    maxi = curr_time
+    for child in node.child_nodes:
+        if enb_adj[node.enb.idx][child.enb.idx] == 0:
+            maxi = max(curr_time, child.node_finish_time)
+        elif (max(curr_time, child.node_finish_time) + (child.input_size / enb_adj[node.enb.idx][child.enb.idx])) > maxi:
+            maxi = max(curr_time, child.node_finish_time) + (child.input_size / enb_adj[node.enb.idx][child.enb.idx])
+    return maxi    
+
 class ActorAgent():
     def __init__(self, sess, node_input_dim, job_input_dim, hid_dims, output_dim,
                  max_depth, eps=1e-6, act_fn=leaky_relu,

@@ -1,7 +1,7 @@
 #coding=utf-8
 import os
 
-from heuristic_agent import DynamicPartitionAgent
+# from heuristic_agent import DynamicPartitionAgent
 
 os.environ['CUDA_VISIBLE_DEVICES']='0'
 os.environ['TF_CPP_MIN_LOG_LEVEL']='2'

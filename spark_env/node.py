@@ -4,8 +4,9 @@ from utils import OrderedSet
 
 
 class Node(object):
-    def __init__(self, idx, wall_time, np_random, workload):
+    def __init__(self, idx, name, wall_time, np_random, params, input_size=0.00000001, output_size = 0.00000001):
         self.idx = idx
+        self.name = name
         # self.tasks = tasks
         self.wall_time = wall_time
         self.np_random = np_random
@@ -15,11 +16,10 @@ class Node(object):
         self.node_start_time = np.inf
         self.node_finished = False
 
-
         # self.task_duration = task_duration
-        self.workload = workload
-        self.input_size = 0.00000001
-        self.output_size = 0.00000001
+        self.workload = params
+        self.input_size = input_size
+        self.output_size = output_size
 
         self.tran_loss = -1
         self.waste_loss = -1
@@ -30,6 +30,9 @@ class Node(object):
         self.child_nodes = []
         self.descendant_nodes = []
         self.job_dag = None
+
+        # 反向传播标识
+        self.back_sign = False
 
     def is_schedulable(self):
         parents_occupied = True

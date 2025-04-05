@@ -1,8 +1,11 @@
+from ast import arg
 import os
 from param import *
 from utils import *
 from spark_env.node import *
 from spark_env.job_dag import *
+from spark_env.construct import construct
+import json
 
 
 def load_job(file_path, query_size, query_idx, wall_time, np_random, np_random_workload, source_device, job_idx):
@@ -21,7 +24,7 @@ def load_job(file_path, query_size, query_idx, wall_time, np_random, np_random_w
 
         # generate a node
         workload = np_random_workload.randint(10, 100)
-        node = Node(n, wall_time, np_random, workload)
+        node = Node(n, "node" + str(n), wall_time, np_random, workload)
         nodes.append(node)
 
     # parent and child node info
@@ -79,10 +82,15 @@ def generate_tpch_jobs(np_random, np_random_workload, timeline, wall_time):
 
     job_dags = OrderedSet()
     t = 0
+    jobs = []
+    with open("./spark_env/jobs.json", "r") as rf:
+        data = json.load(rf)
+        for i in data:
+            jobs.append(i)
+
     # 不放回采样
     tpch_group = list(range(args.tpch_num))
-    if args.num_init_dags + args.num_stream_dags == 100:
-        tpch_group = list(range(100))
+
     tpch_idx = []
     for _ in range(args.num_init_dags + args.num_stream_dags):
         idx = (np_random.choice(tpch_group))
@@ -93,9 +101,13 @@ def generate_tpch_jobs(np_random, np_random_workload, timeline, wall_time):
         query_idx = str(idx + 1)
         query_size = args.tpch_size[np_random.randint(len(args.tpch_size))]
         source_device = idx % args.mobile_device_num
+
         # generate job
-        job_dag = load_job(
-            args.job_folder, query_size, query_idx, wall_time, np_random, np_random_workload, source_device, idx)
+        if args.test_size:
+            job_dag = load_job(
+                args.job_folder, query_size, query_idx, wall_time, np_random, np_random_workload, source_device, idx)
+        else:
+            job_dag = construct(jobs[idx + 1], wall_time, np_random, source_device, idx)
         # job already arrived, put in job_dags
         job_dag.start_time = t
         job_dag.arrived = True
@@ -110,9 +122,13 @@ def generate_tpch_jobs(np_random, np_random_workload, timeline, wall_time):
         query_size = args.tpch_size[np_random.randint(len(args.tpch_size))]
         # query_idx = str(np_random.randint(args.tpch_num) + 1)
         query_idx = str(idx + args.num_init_dags + 1)
+
         # generate job
-        job_dag = load_job(
-            args.job_folder, query_size, query_idx, wall_time, np_random, np_random_workload, source_device, idx + args.num_init_dags)
+        if args.test_size:
+            job_dag = load_job(
+                args.job_folder, query_size, query_idx, wall_time, np_random, np_random_workload, source_device, idx + args.num_init_dags)
+        else:
+            job_dag = construct(jobs[idx + 1 + args.num_init_dags], wall_time, np_random, source_device, idx)
         # push into timeline
         job_dag.start_time = t
         assert job_dag is not None
