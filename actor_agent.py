@@ -332,6 +332,50 @@ class ActorAgent():
                 gradients + [lr_rate])
         })
 
+    def translate_states(self, obs, ep, time, agent_id):
+        """
+        Translate the observation to matrix form
+        """
+        job_dags, enb_adj, num_avail_position,  \
+        frontier_nodes, action_map, servers, curr_time = obs
+
+        # compute total number of nodes
+        total_num_nodes = int(np.sum(job_dag.num_nodes for job_dag in job_dags))
+
+        # job and node inputs to feed
+        node_inputs = np.zeros([total_num_nodes, self.node_input_dim])
+        job_inputs = np.zeros([len(job_dags), self.job_input_dim])
+
+        # gather job level inputs
+        # job_idx = 0
+        # for job_dag in job_dags:
+        #     job_inputs[job_idx, 0] = (curr_time - job_dag.start_time) / 100
+        #     job_idx += 1
+
+        # gather node level inputs
+        node_idx = 0
+        job_idx = 0
+        for job_dag in job_dags:
+            for node in job_dag.nodes:
+
+                # work on the node
+                node_inputs[node_idx, 0] = (node.workload - 10) / 90
+                node_inputs[node_idx, 1] = node.input_size / 20
+                node_inputs[node_idx, 2] = node.output_size / 20
+
+                node_inputs[node_idx, 3] = (node.back_workload - 10) / 90
+                node_inputs[node_idx, 4] = node.back_input_size / 20
+                node_inputs[node_idx, 5] = node.back_output_size / 20
+
+
+                node_idx += 1
+            job_idx += 1
+
+        return node_inputs, job_inputs, \
+               job_dags, \
+               frontier_nodes, action_map, enb_adj, servers, curr_time
+
+
     def define_params_op(self):
         # define operations for setting network parameters
         input_params = []
@@ -540,8 +584,6 @@ class ActorAgent():
         for job_dag in job_dags:
             for node in job_dag.nodes:
 
-                #node_inputs[node_idx, :1] = job_inputs[job_idx, :1]
-
                 # work on the node
                 node_inputs[node_idx, 0] = (node.workload - 10) / 90
 
@@ -633,22 +675,10 @@ class ActorAgent():
                     for i in range(args.enb_num):
                         job_left_inputs[node_idx, i+2] = abs(
                             get_node_est_by_parents(node, i, enb_adj, curr_time) - max(curr_time, servers[i].avail_time)) / 100
-                    # job_left_inputs[node_idx, 2] = abs(get_node_est_by_parents(node, 0, enb_adj, curr_time) - max(curr_time, servers[0].avail_time)) / 100
-                    # job_left_inputs[node_idx, 3] = abs(get_node_est_by_parents(node, 1, enb_adj, curr_time) - max(curr_time, servers[1].avail_time)) / 100
-                    # job_left_inputs[node_idx, 4] = abs(get_node_est_by_parents(node, 2, enb_adj, curr_time) - max(curr_time, servers[2].avail_time)) / 100
-                    # job_left_inputs[node_idx, 5] = abs(get_node_est_by_parents(node, 3, enb_adj, curr_time) - max(curr_time, servers[3].avail_time)) / 100
-                    # job_left_inputs[node_idx, 6] = abs(get_node_est_by_parents(node, 4, enb_adj, curr_time) - max(curr_time, servers[4].avail_time)) / 100
-                    # job_left_inputs[node_idx, 7] = abs(get_node_est_by_parents(node, 3, enb_adj, curr_time) - max(curr_time, servers[5].avail_time)) / 100
                 else:
                     job_left_inputs[node_idx, 1] = -1
                     for i in range(args.enb_num):
                         job_left_inputs[node_idx, i+2] = -1
-                    # job_left_inputs[node_idx, 2] = -1
-                    # job_left_inputs[node_idx, 3] = -1
-                    # job_left_inputs[node_idx, 4] = -1
-                    # job_left_inputs[node_idx, 5] = -1
-                    # job_left_inputs[node_idx, 6] = -1
-                    # job_left_inputs[node_idx, 7] = -1
 
                 node_idx += 1
 

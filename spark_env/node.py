@@ -1,6 +1,7 @@
 import numpy as np
 from param import *
 from utils import OrderedSet
+import random
 
 
 class Node(object):
@@ -20,6 +21,10 @@ class Node(object):
         self.workload = params
         self.input_size = input_size
         self.output_size = output_size
+
+        self.back_workload = random.randint(self.workload / 2, self.workload)
+        self.back_input_size = output_size
+        self.back_output_size = input_size
 
         self.tran_loss = -1
         self.waste_loss = -1
